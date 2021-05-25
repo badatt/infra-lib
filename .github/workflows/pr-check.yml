@@ -5,7 +5,7 @@ on:
     branches:
       - master
       - develop
-      - 'releases/**'
+      - "releases/**"
 
 jobs:
   build:
@@ -15,10 +15,10 @@ jobs:
     steps:
       - name: Check out the code
         uses: actions/checkout@v2
-    
+
       - name: Set up Node
         uses: actions/setup-node@v2.1.5
         id: node
-      
+
       - name: Spellcheck
-        yarn spellcheck
+        run: yarn spellcheck
