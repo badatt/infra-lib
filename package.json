@@ -1,0 +1,73 @@
+{
+  "name": "@badatt/infra-lib",
+  "version": "1.0.0",
+  "description": "📦 A library of reusable code to quick start infrastructure in AWS",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src --ext .ts",
+    "lint-fix": "eslint src --ext .ts ./ --fix",
+    "spellcheck": "spellchecker -f src/**/*.md README.md -d .spelling -l en-GB",
+    "lint-markdown": "markdownlint src/**/*.md README.md",
+    "test": "node_modules/.bin/jest --coverage"
+  },
+  "keywords": [
+    "aws",
+    "cdk",
+    "infrastructure",
+    "typescript",
+    "library",
+    "package"
+  ],
+  "author": "dev.badatt@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/badatt/infra-lib/issues"
+  },
+  "homepage": "https://github.com/badatt/infra-lib#readme",
+  "devDependencies": {
+    "@types/jest": "^26.0.23",
+    "@types/node": "^14.14.44",
+    "@typescript-eslint/eslint-plugin": "^4.23.0",
+    "@typescript-eslint/parser": "^4.23.0",
+    "eslint": "^7.26.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "jest": "^26.6.3",
+    "markdownlint-cli": "^0.27.1",
+    "prettier": "^2.3.0",
+    "spellchecker-cli": "^4.4.0",
+    "ts-jest": "^26.5.6",
+    "ts-mockito": "^2.6.1",
+    "typedoc": "^0.20.36",
+    "typescript": "^4.2.4"
+  },
+  "dependencies": {
+    "@aws-cdk/assert": "1.95.1",
+    "@aws-cdk/aws-apigateway": "1.95.1",
+    "@aws-cdk/aws-certificatemanager": "1.95.1",
+    "@aws-cdk/aws-cloudfront": "1.95.1",
+    "@aws-cdk/aws-cloudwatch": "1.95.1",
+    "@aws-cdk/aws-codedeploy": "1.95.1",
+    "@aws-cdk/aws-ec2": "1.95.1",
+    "@aws-cdk/aws-iam": "1.95.1",
+    "@aws-cdk/aws-kms": "1.95.1",
+    "@aws-cdk/aws-lambda": "1.95.1",
+    "@aws-cdk/aws-lambda-event-sources": "1.95.1",
+    "@aws-cdk/aws-route53": "1.95.1",
+    "@aws-cdk/aws-route53-targets": "1.95.1",
+    "@aws-cdk/aws-s3": "1.95.1",
+    "@aws-cdk/aws-s3-deployment": "1.95.1",
+    "@aws-cdk/aws-sns": "1.95.1",
+    "@aws-cdk/aws-sns-subscriptions": "1.95.1",
+    "@aws-cdk/aws-sqs": "1.95.1",
+    "@aws-cdk/aws-wafv2": "1.95.1",
+    "@aws-cdk/core": "1.95.1",
+    "js-yaml": "^4.1.0",
+    "openapi-types": "^8.0.0",
+    "yaml": "^1.10.2"
+  },
+  "files": [
+    "/build/dist"
+  ]
+}
