@@ -20,5 +20,8 @@ jobs:
         uses: actions/setup-node@v2.1.5
         id: node
 
+      - name: Install Dependencies
+        run: yarn
+
       - name: Spellcheck
         run: yarn spellcheck
