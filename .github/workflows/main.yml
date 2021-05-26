@@ -1,4 +1,4 @@
-name: Pull Request Lint
+name: Main Lint
 
 on:
   push:
