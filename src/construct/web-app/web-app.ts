@@ -10,6 +10,9 @@ import { IHostedZone } from '@aws-cdk/aws-route53';
 import { ICertificate } from '@aws-cdk/aws-certificatemanager';
 import { BlockPublicAccess, Bucket, ObjectOwnership } from '@aws-cdk/aws-s3';
 
+/**
+ * Web App construct props
+ */
 export interface WebAppProps {
   readonly rootDomain: string;
 
@@ -20,6 +23,18 @@ export interface WebAppProps {
   readonly certificate: ICertificate;
 }
 
+/**
+ * Creates a serverless SPA Web application. Hosted on S3 bucket.
+ * Cloudfront backs it up as CDN and distributes the content over all Edges.
+ *
+ * This construct expects
+ *
+ *  - A hosted zone to add DNS records, not mandatory. Mandated only
+ *    if you want custom domain attached.
+ *
+ *  - A Certificate with custom domain name, to attach to the cloudfront.
+ *    No custom domain attached in case of absense of the certificate.
+ */
 export class WebApp extends Construct {
   public bucket: Bucket;
   constructor(scope: Construct, id: string, props: WebAppProps) {
