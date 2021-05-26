@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2021 Balu Praveen Datty
+ *
+ * This software is released under the MIT License.
+ * https://opensource.org/licenses/MIT
+ */
+
 import { CfnOutput, Construct } from '@aws-cdk/core';
 import { IHostedZone } from '@aws-cdk/aws-route53';
 import { ICertificate } from '@aws-cdk/aws-certificatemanager';
