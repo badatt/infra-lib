@@ -1,15 +1,13 @@
-name: Main Lint
+name: Release
 
 on:
   push:
     branches:
       - main
-      - develop
-      - 'releases/**'
 
 jobs:
   build:
-    name: Lint
+    name: Release
     runs-on: ubuntu-latest
 
     steps:
