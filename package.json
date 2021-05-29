@@ -1,6 +1,6 @@
 {
   "name": "@badatt/infra-lib",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "📦 A library of reusable code to quick start infrastructure in AWS",
   "main": "index.js",
   "scripts": {
@@ -21,6 +21,10 @@
   ],
   "author": "dev.badatt@gmail.com",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/badatt/infra-lib.git"
+  },
   "bugs": {
     "url": "https://github.com/badatt/infra-lib/issues"
   },
