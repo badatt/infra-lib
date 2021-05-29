@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  build:
-    name: Vet
+  release:
+    name: Release
     runs-on: ubuntu-latest
 
     steps:
@@ -16,10 +16,29 @@ jobs:
 
       - name: Set up Node
         uses: actions/setup-node@v2.1.5
-        id: node
+        with:
+          node-version: '12.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@badatt'
 
       - name: Install Dependencies
         run: yarn
 
       - name: Spellcheck
         run: yarn spellcheck
+
+      - name: Publish to Github
+        run: yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: '12.x'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@badatt'
+
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
