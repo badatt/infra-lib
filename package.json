@@ -1,6 +1,6 @@
 {
   "name": "@badatt/infra-lib",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "📦 A library of reusable code to quick start infrastructure in AWS",
   "main": "index.js",
   "scripts": {
