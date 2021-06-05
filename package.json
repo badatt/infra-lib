@@ -2,7 +2,7 @@
   "name": "@badatt/infra-lib",
   "version": "0.0.2",
   "description": "📦 A library of reusable code to quick start infrastructure in AWS",
-  "main": "index.js",
+  "main": "build/dist/index.js",
   "scripts": {
     "build": "tsc",
     "lint": "eslint src --ext .ts",
