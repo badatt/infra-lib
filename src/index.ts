@@ -10,8 +10,11 @@
  * setup easier
  */
 export { BaseStack } from './stack/base/base-stack';
+export { BaseNestedStack } from './stack/base-nested/base-nested-stack';
 
 /**
  * Bunch usefull constructs
  */
-export { WebApp } from './construct/web-app/web-app';
+export { WebApp, WebAppProps } from './construct/web-app/web-app';
+export { HostedZone, HostedZoneProps } from './construct/hosted-zone/hosted-zone';
+export { Certificate, CertificateProps } from './construct/certificate/certificate';

@@ -31,7 +31,7 @@ export class HostedZone extends Construct {
 
     this.zoneId = this.zone.hostedZoneId;
 
-    new CfnOutput(scope, `${id}HostedZone`, {
+    new CfnOutput(scope, `${id}HostedZoneId`, {
       value: this.zoneId,
       description: `HostedZone Id for ${props.rootDomain}`,
     });

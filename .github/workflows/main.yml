@@ -27,6 +27,9 @@ jobs:
       - name: Spellcheck
         run: yarn spellcheck
 
+      - name: Build
+        run: yarn build
+
       - name: Publish to Github
         run: yarn publish
         env:
