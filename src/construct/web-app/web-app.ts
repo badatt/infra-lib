@@ -5,18 +5,18 @@
  * https://opensource.org/licenses/MIT
  */
 
-import { CfnOutput, Construct, Duration } from '@aws-cdk/core';
+import { CfnOutput, Construct } from '@aws-cdk/core';
 import {
-  CloudFrontAllowedMethods,
-  CloudFrontWebDistribution,
+  AllowedMethods,
+  BehaviorOptions,
+  Distribution,
   OriginAccessIdentity,
-  PriceClass,
-  SecurityPolicyProtocol,
-  ViewerCertificate,
+  ViewerProtocolPolicy,
 } from '@aws-cdk/aws-cloudfront';
+import { S3Origin } from '@aws-cdk/aws-cloudfront-origins';
 import { IHostedZone, ARecord, RecordTarget } from '@aws-cdk/aws-route53';
 import { CloudFrontTarget } from '@aws-cdk/aws-route53-targets';
-import { ICertificate } from '@aws-cdk/aws-certificatemanager';
+import { DnsValidatedCertificate, ICertificate } from '@aws-cdk/aws-certificatemanager';
 import { BlockPublicAccess, Bucket, ObjectOwnership } from '@aws-cdk/aws-s3';
 import { ArnPrincipal, Effect, PolicyStatement } from '@aws-cdk/aws-iam';
 
@@ -29,6 +29,10 @@ export interface WebAppProps {
   readonly hostedZone: IHostedZone;
 
   readonly certificate: ICertificate;
+
+  readonly routes?: string[];
+
+  readonly dnsValidationCertficate?: boolean;
 }
 
 /**
@@ -44,23 +48,23 @@ export interface WebAppProps {
  *    No custom domain attached in case of absense of the certificate.
  */
 export class WebApp extends Construct {
-  public bucket: Bucket;
+  //public bucket: Bucket;
   constructor(scope: Construct, id: string, props: WebAppProps) {
     super(scope, id);
 
-    this.bucket = new Bucket(scope, `${id}DeploymentBucket`, {
-      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
-      objectOwnership: ObjectOwnership.BUCKET_OWNER_PREFERRED,
-    });
+    let cert: ICertificate;
 
-    const githubDroidAccessPolicy = new PolicyStatement({
-      actions: ['s3:DeleteObject*', 's3:PutObject', 's3:Abort*', 's3:ListBucket', 's3:PutObjectAcl'],
-      effect: Effect.ALLOW,
-      principals: [new ArnPrincipal('arn:aws:iam::261778676253:user/github-droid')],
-      resources: [this.bucket.bucketArn, `${this.bucket.bucketArn}/*`],
-    });
+    if (props?.dnsValidationCertficate) {
+      cert = new DnsValidatedCertificate(scope, `${id}DnsValidationCertificate`, {
+        domainName: props.siteUrl,
+        hostedZone: props.hostedZone,
+        region: 'us-east-1',
+      });
+    } else {
+      cert = props.certificate;
+    }
 
-    this.bucket.addToResourcePolicy(githubDroidAccessPolicy);
+    const rootBucket = this.createDeploymentBucket(scope, 'Root');
 
     // CloudFront Access Identity
     const cloudFrontAccessIdentity = new OriginAccessIdentity(scope, `${id}OriginAccessIdentity`, {
@@ -68,52 +72,39 @@ export class WebApp extends Construct {
     });
 
     // CloudFront distribution for site application
-    const cloudfrontDistribution = new CloudFrontWebDistribution(scope, `${id}CloudfrontDistribution`, {
+    const additionalBehaviours: Record<string, BehaviorOptions> = {};
+
+    props.routes?.forEach((value, index) => {
+      const bucket = this.createDeploymentBucket(scope, value);
+      additionalBehaviours[value] = {
+        origin: new S3Origin(bucket, {
+          originAccessIdentity: cloudFrontAccessIdentity,
+        }),
+        allowedMethods: AllowedMethods.ALLOW_ALL,
+        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      };
+    });
+
+    const cloudfrontDistribution = new Distribution(scope, `${id}CloudfrontDistribution`, {
       comment: props.siteUrl + ' CloudFront distribution',
-      enableIpV6: false,
-      originConfigs: [
+      defaultBehavior: {
+        origin: new S3Origin(rootBucket),
+        allowedMethods: AllowedMethods.ALLOW_ALL,
+        viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      },
+      additionalBehaviors: additionalBehaviours,
+      certificate: cert,
+      domainNames: [props.siteUrl],
+      errorResponses: [
         {
-          s3OriginSource: {
-            originAccessIdentity: cloudFrontAccessIdentity,
-            s3BucketSource: this.bucket,
-          },
-          behaviors: [
-            {
-              allowedMethods: CloudFrontAllowedMethods.ALL,
-              compress: true,
-              forwardedValues: {
-                cookies: {
-                  forward: 'none',
-                },
-                // Forward the origin header so that the S3 origin can react to CORS requests
-                // and return the expected headers.
-                headers: ['Origin'],
-                queryString: false,
-              },
-              defaultTtl: Duration.seconds(5),
-              isDefaultBehavior: true,
-              minTtl: Duration.seconds(5),
-            },
-          ],
-        },
-      ],
-      priceClass: PriceClass.PRICE_CLASS_100,
-      viewerCertificate: ViewerCertificate.fromAcmCertificate(props.certificate, {
-        securityPolicy: SecurityPolicyProtocol.TLS_V1_2_2018,
-        aliases: [props.siteUrl],
-      }),
-      errorConfigurations: [
-        {
-          errorCode: 403,
+          httpStatus: 403,
           responsePagePath: '/index.html',
-          responseCode: 200,
-          errorCachingMinTtl: 0,
+          responseHttpStatus: 403,
         },
         {
-          errorCode: 404,
+          httpStatus: 404,
           responsePagePath: '/index.html',
-          responseCode: 200,
-          errorCachingMinTtl: 0,
+          responseHttpStatus: 404,
         },
       ],
     });
@@ -124,10 +115,27 @@ export class WebApp extends Construct {
       target: RecordTarget.fromAlias(new CloudFrontTarget(cloudfrontDistribution)),
       zone: props.hostedZone,
     });
+  }
+
+  createDeploymentBucket = (scope: Construct, id: string): Bucket => {
+    const bucket = new Bucket(scope, `${id}DeploymentBucket`, {
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      objectOwnership: ObjectOwnership.BUCKET_OWNER_PREFERRED,
+    });
+
+    const githubDroidAccessPolicy = new PolicyStatement({
+      actions: ['s3:DeleteObject*', 's3:PutObject', 's3:Abort*', 's3:ListBucket', 's3:PutObjectAcl'],
+      effect: Effect.ALLOW,
+      principals: [new ArnPrincipal('arn:aws:iam::261778676253:user/github-droid')],
+      resources: [bucket.bucketArn, `${bucket.bucketArn}/*`],
+    });
+
+    bucket.addToResourcePolicy(githubDroidAccessPolicy);
 
     new CfnOutput(scope, `${id}WebsiteBucket`, {
-      value: this.bucket.bucketName,
-      description: `The deployment bucket for ${props.siteUrl}`,
+      value: bucket.bucketName,
     });
-  }
+
+    return bucket;
+  };
 }

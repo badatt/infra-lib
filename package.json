@@ -1,6 +1,6 @@
 {
   "name": "@badatt/infra-lib",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "📦 A library of reusable code to quick start infrastructure in AWS",
   "main": "build/dist/index.js",
   "scripts": {
@@ -51,6 +51,7 @@
     "@aws-cdk/aws-apigateway": "1.95.1",
     "@aws-cdk/aws-certificatemanager": "1.95.1",
     "@aws-cdk/aws-cloudfront": "1.95.1",
+    "@aws-cdk/aws-cloudfront-origins": "1.95.1",
     "@aws-cdk/aws-cloudwatch": "1.95.1",
     "@aws-cdk/aws-codedeploy": "1.95.1",
     "@aws-cdk/aws-ec2": "1.95.1",
