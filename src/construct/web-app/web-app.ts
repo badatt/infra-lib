@@ -5,19 +5,12 @@
  * https://opensource.org/licenses/MIT
  */
 
-import { CfnOutput, Construct, Duration } from '@aws-cdk/core';
+import { CfnOutput, Construct } from '@aws-cdk/core';
 import {
   AllowedMethods,
   BehaviorOptions,
-  CachedMethods,
-  CachePolicy,
-  CloudFrontAllowedMethods,
-  CloudFrontWebDistribution,
   Distribution,
   OriginAccessIdentity,
-  PriceClass,
-  SecurityPolicyProtocol,
-  ViewerCertificate,
   ViewerProtocolPolicy,
 } from '@aws-cdk/aws-cloudfront';
 import { S3Origin } from '@aws-cdk/aws-cloudfront-origins';
@@ -26,7 +19,6 @@ import { CloudFrontTarget } from '@aws-cdk/aws-route53-targets';
 import { DnsValidatedCertificate, ICertificate } from '@aws-cdk/aws-certificatemanager';
 import { BlockPublicAccess, Bucket, ObjectOwnership } from '@aws-cdk/aws-s3';
 import { ArnPrincipal, Effect, PolicyStatement } from '@aws-cdk/aws-iam';
-import { Certificate } from 'crypto';
 
 /**
  * Web App construct props
@@ -140,7 +132,7 @@ export class WebApp extends Construct {
 
     bucket.addToResourcePolicy(githubDroidAccessPolicy);
 
-    new CfnOutput(scope, `${id}RootWebsiteBucket`, {
+    new CfnOutput(scope, `${id}WebsiteBucket`, {
       value: bucket.bucketName,
     });
 
