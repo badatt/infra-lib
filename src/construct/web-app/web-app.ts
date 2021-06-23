@@ -64,18 +64,39 @@ export class WebApp extends Construct {
       cert = props.certificate;
     }
 
-    const rootBucket = this.createDeploymentBucket(scope, 'Root');
-
     // CloudFront Access Identity
     const cloudFrontAccessIdentity = new OriginAccessIdentity(scope, `${id}OriginAccessIdentity`, {
       comment: props.siteUrl + ' Access Identity',
     });
+
+    const rootBucket = this.createDeploymentBucket(scope, 'Root');
+
+    const cloudfrontRootS3Access = new PolicyStatement({
+      actions: ['s3:GetBucket*', 's3:GetObject*', 's3:List*'],
+      resources: [rootBucket.bucketArn, `${rootBucket.bucketArn}/*`],
+    });
+
+    cloudfrontRootS3Access.addCanonicalUserPrincipal(
+      cloudFrontAccessIdentity.cloudFrontOriginAccessIdentityS3CanonicalUserId,
+    );
+
+    rootBucket.addToResourcePolicy(cloudfrontRootS3Access);
 
     // CloudFront distribution for site application
     const additionalBehaviours: Record<string, BehaviorOptions> = {};
 
     props.routes?.forEach((value, index) => {
       const bucket = this.createDeploymentBucket(scope, value);
+      const cloudfrontS3Access = new PolicyStatement({
+        actions: ['s3:GetBucket*', 's3:GetObject*', 's3:List*'],
+        resources: [bucket.bucketArn, `${bucket.bucketArn}/*`],
+      });
+
+      cloudfrontS3Access.addCanonicalUserPrincipal(
+        cloudFrontAccessIdentity.cloudFrontOriginAccessIdentityS3CanonicalUserId,
+      );
+
+      bucket.addToResourcePolicy(cloudfrontS3Access);
       additionalBehaviours[value] = {
         origin: new S3Origin(bucket, {
           originAccessIdentity: cloudFrontAccessIdentity,
@@ -88,13 +109,16 @@ export class WebApp extends Construct {
     const cloudfrontDistribution = new Distribution(scope, `${id}CloudfrontDistribution`, {
       comment: props.siteUrl + ' CloudFront distribution',
       defaultBehavior: {
-        origin: new S3Origin(rootBucket),
+        origin: new S3Origin(rootBucket, {
+          originAccessIdentity: cloudFrontAccessIdentity,
+        }),
         allowedMethods: AllowedMethods.ALLOW_ALL,
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       additionalBehaviors: additionalBehaviours,
       certificate: cert,
       domainNames: [props.siteUrl],
+      defaultRootObject: 'index.html',
       errorResponses: [
         {
           httpStatus: 403,

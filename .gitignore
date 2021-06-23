@@ -267,5 +267,6 @@ cdk.out
 /.vscode
 /.fun
 /.layer
+.metals/
 
 .yalc
