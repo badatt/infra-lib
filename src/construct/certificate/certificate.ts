@@ -15,8 +15,7 @@ import { HostedZone } from '@aws-cdk/aws-route53';
  * 'prefix' defaults to '*'
  */
 export interface CertificateProps {
-  readonly rootDomain: string;
-  readonly prefix: string;
+  readonly domainName: string;
   readonly validate?: boolean;
   readonly hostedZone?: HostedZone;
 }
@@ -30,10 +29,8 @@ export class Certificate extends Construct {
   constructor(scope: Construct, id: string, props: CertificateProps) {
     super(scope, id);
 
-    const domainName = props.prefix ? `${props.prefix}.${props.rootDomain}` : `*.${props.rootDomain}`;
-
     this.certificate = new AwsCertificate(scope, `${id}Certificate`, {
-      domainName,
+      domainName: props.domainName,
       validation: props.validate ? CertificateValidation.fromDns(props.hostedZone) : undefined,
     });
 
@@ -41,7 +38,7 @@ export class Certificate extends Construct {
 
     new CfnOutput(scope, `${id}CertificateArn`, {
       value: this.certificateArn,
-      description: `Certificate Arn for ${domainName}`,
+      description: `Certificate Arn for ${props.domainName}`,
     });
   }
 }
